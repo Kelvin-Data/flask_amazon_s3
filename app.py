@@ -29,35 +29,43 @@ def create_app():
     @app.route('/', methods=['GET', 'POST'])
     def index():
         if request.method == 'POST':
+            if 'file-to-save' not in request.files:
+                return 'NO FILE SELECTED'
+
+            uploaded_file = request.files['file-to-save']
+
             if uploaded_file.filename == '':
                 return 'NO FILE SELECTED'
-            
-            if 'file-to-save' not in request.files:
-               return 'NO FILE SELECTED'
-            
-            uploaded_file = request.files['file-to-save']
+
             if not allowed_file(uploaded_file.filename):
                 return 'FILE NOT ALLOWED'
-            
-            bucket_name = 'flaskupload76'    
-            
-            new_filename = uuid.uuid4().hex + '.'+ uploaded_file.filename.rsplit('.', 1)[1].lower()
-            
+
+            bucket_name = 'flaskupload76'
+
+            new_filename = (
+                uuid.uuid4().hex
+                + '.'
+                + uploaded_file.filename.rsplit('.', 1)[1].lower()
+            )
+
             s3 = boto3.resource('s3')
-            s3.Bucket(bucket_name).upload_fileobj(uploaded_file, new_filename)    
-            
+            s3.Bucket(bucket_name).upload_fileobj(
+                uploaded_file,
+                new_filename
+            )
+
             file = File(
                 original_filename=uploaded_file.filename,
                 filename=new_filename,
                 bucket=bucket_name,
                 region='ap-southeast-1',
-                
             )
+
             db.session.add(file)
             db.session.commit()
 
             return redirect(url_for('index'))
-        
+
         files = File.query.all()
         return render_template('index.html', files=files)
 
