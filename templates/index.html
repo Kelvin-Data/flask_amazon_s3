@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h3>Upload File to S3</h3>
+
+    <form action="/" method="post" enctype="multipart/form-data">
+        <input type="file" name="file-to-save">
+        <button>Upload</button>
+    </form>
+
+    {% for file in files %}
+        <div>{{ file.original_filename }} - <a href="{{ file.bucket }}.s3.{{ file.region }}.amazonaws.com/{{ file.filename }}">{{ file.filename }}</a></div>
+    {% endfor %}
+</body>
+</html>
