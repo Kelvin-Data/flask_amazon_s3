@@ -26,14 +26,14 @@ def create_app():
     @app.route('/', methods=['GET', 'POST'])
     def index():
         if request.method == 'POST':
-            # Handle file upload and save to S3
+          
             
             uploaded_file = request.files['file-to-save']
             if not allowed_file(uploaded_file.filename):
-                # Process the uploaded file and save it to S3
+               
                 return 'FILE NOT ALLOWED'
             
-            # Replace with your S3 bucket name and region
+           
             bucket_name = 'flaskupload76'    
             
             new_filename = uuid.uuid4().hex + '.'+ uploaded_file.filename.rsplit('.', 1)[1].lower()
