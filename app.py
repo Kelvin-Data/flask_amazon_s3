@@ -1,4 +1,4 @@
-from flask import Flask, app, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import boto3
 import uuid
@@ -16,24 +16,29 @@ class File(db.Model):
     filename = db.Column(db.String(100))
     bucket = db.Column(db.String(100))
     region = db.Column(db.String(100))
-    url = db.Column(db.String(200))
+
 
 def create_app():
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///s3.db'
     db.init_app(app)
+    
+    with app.app_context():
+        db.create_all()
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
         if request.method == 'POST':
-          
+            if uploaded_file.filename == '':
+                return 'NO FILE SELECTED'
+            
+            if 'file-to-save' not in request.files:
+               return 'NO FILE SELECTED'
             
             uploaded_file = request.files['file-to-save']
             if not allowed_file(uploaded_file.filename):
-               
                 return 'FILE NOT ALLOWED'
             
-           
             bucket_name = 'flaskupload76'    
             
             new_filename = uuid.uuid4().hex + '.'+ uploaded_file.filename.rsplit('.', 1)[1].lower()
@@ -55,6 +60,12 @@ def create_app():
         
         files = File.query.all()
         return render_template('index.html', files=files)
+
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(debug=True)
 
     return app
 
